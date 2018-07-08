@@ -8,34 +8,54 @@ import time
 import sys
 from datetime import datetime
 
-#FUNCIONES UTILES
+#CONSTANTS
+list_empty = []
 
-#RETURN '' IF PAGE IS 0, RETURN PAGE INDEX NUMBER OTHERWISE
-def indexPage(a):
+
+header_rqs = {
+	'User-Agent': 'JOTGA Technologies',
+	'From': 'jotgatech@gmail.com'
+}
+control = (int(sys.argv[2])-1)*25
+
+#UTIL FUNCTIONS
+def index_page(a):
+	"""
+		Return '' if page is 0, return page index number otherwise
+	"""
 	if(a>0):
 		return str(a)
 	else:
 		return ''
 
-def StillNum(r, a):
+def still_num(r, a):
+	"""
+		Counter for the number of int in a string
+	"""
 	while True:
 		try:
 			int(r[a+1])
 			a = a+1
-			StillNum(r, a)
+			still_num(r, a)
 		except ValueError:
 			a = a+1
 			return a
 
-def getLinks():
+def get_links(index_links, index_pattern, links_nombres, links_href):
+	"""
+		Gets the links in the index.
+	"""
 	for i in index_links:
 		if(re.search(index_pattern, str(i.prettify()))):
 			temp = re.search(index_pattern, str(i.prettify()))
 			temp1 = str(i)
-			links_href.append(temp1[temp.start():StillNum(temp1, temp.end())])
+			links_href.append(temp1[temp.start():still_num(temp1, temp.end())])
 			links_nombres.append(i.text)
 
-def useLinks():
+def use_links(links_href, c_index, index_noemail, noemail_names, index_datos, links_nombres, tablas_company, tablas_nombres, tablas_puesto, tablas_correo, tablas_tel):
+	"""
+	Use the links from get links
+	"""
 	c_pags = 0
 
 	for i in range(0, len(links_href), 2):
@@ -56,7 +76,7 @@ def useLinks():
 			else:
 				pagina_tabla = pagina_soup.find_all('td')
 				print('\t\t\tTABLA ENCONTRADA')
-				getTable(pagina_tabla, i+1)
+				get_table(pagina_tabla, i+1, links_nombres, tablas_company, tablas_nombres, tablas_puesto, tablas_correo, tablas_tel)
 				#print(tablas_company)	#CORRECTO
 				#print(tablas_nombres)	#CORRECTO
 		except IndexError:
@@ -69,7 +89,10 @@ def useLinks():
 
 		c_pags = c_pags+1
 
-def getTable(pagina_tabla, c_empresa):
+def get_table(pagina_tabla, c_empresa, links_nombres, tablas_company, tablas_nombres, tablas_puesto, tablas_correo, tablas_tel):
+	"""
+	Function that gets the table data from the web page
+	"""
 	for k in range(len(pagina_tabla)):
 		if(k%4==0):
 			tablas_company.append(links_nombres[c_empresa])
@@ -81,7 +104,10 @@ def getTable(pagina_tabla, c_empresa):
 		elif(k%4==3):
 			tablas_tel.append(pagina_tabla[k].text)
 
-def doExcel():
+def do_excel(tablas_company, tablas_nombres, tablas_puesto, tablas_correo, tablas_tel, c_index):
+	"""
+		Do the .xlsx file
+	"""
 	wb = pxl.Workbook()
 	ws = wb.active
 	ws.title = "Index "+str((c_index/25)+1)
@@ -130,7 +156,10 @@ def doExcel():
 	except:
 		print('\t\t\tERROR AL GUARDAR')
 
-def sendMail():
+def send_mail():
+	"""
+		Function that sends the emails
+	"""
 	mail_remitente = "jotgatech@gmail.com"
 	mail_mensaje = """
 <br/><br/>
@@ -161,14 +190,17 @@ Subject: %s
 	server.sendmail(mail_remitente, mail_destinatario, mail_email)
 	server.close()
 
-def sendMailtry():
+def send_mail_try():
 	try:
-		sendMail()
+		send_mail()
 		print('\t\t\tMail sended')
 	except sm.SMTPRecipientsRefused:
 		print('\t\t\tNO HAY EMAIL')
 
-def saveData():
+def save_data(index_datos, c_index, index_noemail, links_nombres, noemail_names):
+	"""
+		Function that saves data in .txt doc
+	"""
 	with open('Datos Index '+str((c_index/25)+1)+'.txt', 'w') as fila_datos:
 		for i in range(len(index_datos)):
 			fila_datos.write(links_nombres[(i*2)+1])
@@ -181,62 +213,62 @@ def saveData():
 			fila_noemail.write(links_nombres[noemail_names[i]+1]+'\n')
 			fila_noemail.write(index_noemail[i].text+'\n')
 
-#CONSTANTES
-list_empty = []
-
 #PROGRAMA MAIN
-header_rqs = {
-	'User-Agent': 'JOTGA Technologies',
-	'From': 'jotgatech@gmail.com'
-}
-c_index = 125
-c_correos = 0
-control = (int(sys.argv[1])-1)*25
-while True:
-	tablas_company = []
-	tablas_nombres = []
-	tablas_puesto = []
-	tablas_correo = []
-	tablas_tel = []
-	index_datos = []
-	index_noemail = []
-	noemail_names = []
-	print("Iniciando index "+str((c_index/25)+1))
-	index_ = rqs.get('http://www.directorioautomotriz.com.mx/core/Busqueda/Libre/Index/'+indexPage(c_index)+'/', headers = header_rqs)
-	print("Status: "+str(index_.status_code))
-	print(index_.url)
-	print(str(datetime.now().time()))
-	print("Sleeping")
-	time.sleep(5)
-	index_soup = bf(index_.content, 'html.parser')
-	#print(index_soup.prettify())#CORRECTO
-	index_links = index_soup.find_all('a')
-	index_pattern = r'http://www.directorioautomotriz.com.mx/core/Negocio/detail/'
-	links_nombres = []
-	links_href = []
-	getLinks()
-	print(len(links_href))
-	#print(len(links_nombres))
-	#print("\n".join(links_href))
-	#print("SEPARADOR\n\n\n")			#Correcto
-	#print("\n".join(links_nombres))
-	#print(links_nombres)
-	useLinks()
-	#FUNCION EXCEL
-	if(len(tablas_company)>0):
-		doExcel()
-	c_correos = c_correos + len(tablas_correo)
-	#FUNCION EMAILS
-	#print(tablas_correo)
-	#sendMailtry()
-	print('\t\t\t'+str(datetime.now().time()))
-	saveData()
-	if(c_index == control):
-		print('FINALIZANDO PROGRAMA')
-		break
-	else:
-		print('CONTINUANDO')
-		c_index = c_index+25
-		continue
+def main():
+	"""
+		main of program
+	"""
+	c_index = (int(sys.argv[1])-1)*25
+	c_correos = 0
+	while True:
+		tablas_company = []
+		tablas_nombres = []
+		tablas_puesto = []
+		tablas_correo = []
+		tablas_tel = []
+		index_datos = []
+		index_noemail = []
+		noemail_names = []
+		print("Iniciando index "+str((c_index/25)+1))
+		index_ = rqs.get('http://www.directorioautomotriz.com.mx/core/Busqueda/Libre/Index/'+index_page(c_index)+'/', headers = header_rqs)
+		print("Status: "+str(index_.status_code))
+		print(index_.url)
+		print(str(datetime.now().time()))
+		print("Sleeping")
+		time.sleep(5)
+		index_soup = bf(index_.content, 'html.parser')
+		#print(index_soup.prettify())#CORRECTO
+		index_links = index_soup.find_all('a')
+		#print(index_links)
+		index_pattern = r'http://www.directorioautomotriz.com.mx/core/Negocio/detail/'
+		links_nombres = []
+		links_href = []
+		get_links(index_links, index_pattern, links_nombres, links_href)
+		print(len(links_href))
+		#print(len(links_nombres))
+		#print("\n".join(links_href))
+		#print("SEPARADOR\n\n\n")			#Correcto
+		#print("\n".join(links_nombres))
+		#print(links_nombres)
+		use_links(links_href, c_index, index_noemail, noemail_names, index_datos, links_nombres, tablas_company, tablas_nombres, tablas_puesto, tablas_correo, tablas_tel)
+		#FUNCION EXCEL
+		if(len(tablas_company)>0):
+			do_excel(tablas_company, tablas_nombres, tablas_puesto, tablas_correo, tablas_tel, c_index)
+		c_correos = c_correos + len(tablas_correo)
+		#FUNCION EMAILS
+		#print(tablas_correo)
+		#send_mail_try()
+		print('\t\t\t'+str(datetime.now().time()))
+		save_data(index_datos, c_index, index_noemail, links_nombres, noemail_names)
+		if(c_index == control):
+			print('FINALIZANDO PROGRAMA')
+			break
+		else:
+			print('CONTINUANDO')
+			c_index = c_index+25
+			continue
 
-print("Numero de correos enviados: "+str(c_correos))
+	print("Numero de correos enviados: "+str(c_correos))
+
+if(__name__=='__main__'):
+	main()

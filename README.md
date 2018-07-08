@@ -47,9 +47,9 @@ git clone https://github.com/pepetorres1998/AutomatizationSpam
 ### Using
 
 Just run ProyectoDirectorioAutomotriz.py in console.
+First argument starting page, last argument is last page of the index to be scraped.
 
 ```
-python3 ProyectoDirectorioAutomotriz.py
+python3 ProyectoDirectorioAutomotriz.py 1 5
 ```
 THATS IT. THANK YOU FOR READING ^-^
-

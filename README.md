@@ -1,14 +1,14 @@
-#AUTOMATIZATION PROJECT.
+# AUTOMATIZATION PROJECT.
 
 This is an automatization project, consist in scrap this [web page](http://www.directorioautomotriz.com.mx/index/), obtaining data from companies, and sending them an email. This project works just with that page, can be improved with Regular Expression. It also generate an excel table with all the data recabed, also an `.txt` with general data of the company.
 
 **This project was tested, but never commercialized**
 
-##Getting Started.
+## Getting Started.
 
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
 
-###Prerequisites.
+### Prerequisites.
 
 You need Python3 in your system.
 Also a couple libraries:
@@ -37,14 +37,14 @@ Install with pip3:
 pip3 install openpyxl
 ```
 
-###Installing
+### Installing
 
 Just clone the github to were you want the excel and txt to be placed.
 
 ```
 git clone https://github.com/pepetorres1998/AutomatizationSpam
 ```
-###Using
+### Using
 
 Just run ProyectoDirectorioAutomotriz.py in console.
 

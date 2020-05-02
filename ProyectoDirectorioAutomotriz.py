@@ -176,7 +176,7 @@ Para informaci&oacute;n o comentarios: jotgatech@gmail.com</p>
 	mail_asunto = "Servicio automatizacion de correos."
 	server = sm.SMTP_SSL('smtp.gmail.com:465')
 	server.ehlo()
-	server.login(mail_remitente, 'panteras_lynx98') #CORRIGE CONTRASEÑA
+	server.login(mail_remitente, 'contraseñaxd') #CORRIGE CONTRASEÑA
 	mail_destinatario = tablas_correo
 	mail_email = """From: <%s>
 To: <%s>
